@@ -29,7 +29,7 @@ Tasks:
 ## Important Before You Start
 
 > [!CAUTION]  
-> Before you proceed: Modifying system networking rules can cause loss of connectivity.  
+> **Before you proceed:** Modifying system networking rules can cause loss of connectivity.  
 > Please ensure you have physical access to the device or a backup connection method to revert changes if necessary.
 
 > [!WARNING]
