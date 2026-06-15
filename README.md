@@ -18,6 +18,8 @@ This guide is provided for educational purposes only.
 - [Step 7. Configure DNS via systemd-resolved](#step-7-configure-dns-via-systemd-resolved)
 - [Step 8. Final Verification](#step-8-final-verification)
 
+---
+
 # Linux VPN Gateway for the Entire Home Network
 
 Problem: some devices (for example, TVs and set-top boxes) do not support VPN client installation, and some VPN solutions cannot be shared across the whole local network out of the box.
