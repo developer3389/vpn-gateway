@@ -6,6 +6,18 @@ This guide is provided for educational purposes only.
 > [!CAUTION]
 > **Use at your own risk.**
 
+## Table of Contents
+- [Linux VPN Gateway for the Entire Home Network](#linux-vpn-gateway-for-the-entire-home-network)
+- [Important Before You Start](#important-before-you-start)
+- [Step 1. Assign a Static IP](#step-1-assign-a-static-ip-to-the-linux-gateway)
+- [Step 2. Disable System Sleep](#step-2-disable-system-sleep)
+- [Step 3. Enable Auto-Login (Optional)](#step-3-enable-auto-login-optional)
+- [Step 4. Prepare a Test Device](#step-4-prepare-a-test-device)
+- [Step 5. Create the Rules Script](#step-5-create-the-rules-script-optvpn-rulessh)
+- [Step 6. Create a systemd Service](#step-6-create-a-systemd-service-for-gateway-rules)
+- [Step 7. Configure DNS via systemd-resolved](#step-7-configure-dns-via-systemd-resolved)
+- [Step 8. Final Verification](#step-8-final-verification)
+
 # Linux VPN Gateway for the Entire Home Network
 
 Problem: some devices (for example, TVs and set-top boxes) do not support VPN client installation, and some VPN solutions cannot be shared across the whole local network out of the box.
@@ -25,17 +37,6 @@ Tasks:
 - split devices: some through VPN, some without VPN;
 - keep admin access to the gateway from the local network (SSH/RDP);
 - keep the gateway stable for 24/7 operation.
-
-## Table of Contents
-- [Important Before You Start](#important-before-you-start)
-- [Step 1. Assign a Static IP](#step-1-assign-a-static-ip-to-the-linux-gateway)
-- [Step 2. Disable System Sleep](#step-2-disable-system-sleep)
-- [Step 3. Enable Auto-Login (Optional)](#step-3-enable-auto-login-optional)
-- [Step 4. Prepare a Test Device](#step-4-prepare-a-test-device)
-- [Step 5. Create the Rules Script](#step-5-create-the-rules-script-optvpn-rulessh)
-- [Step 6. Create a systemd Service](#step-6-create-a-systemd-service-for-gateway-rules)
-- [Step 7. Configure DNS via systemd-resolved](#step-7-configure-dns-via-systemd-resolved)
-- [Step 8. Final Verification](#step-8-final-verification)
 
 ## Important Before You Start
 
