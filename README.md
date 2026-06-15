@@ -55,28 +55,63 @@ Example network parameters:
    - DNS: `192.168.0.3`
 7. Click `Apply` and reboot the system to apply changes.
 
-## Step 2. Create a systemd Service for Gateway Rules
+## Step 2. Disable System Sleep
 
-Create `vpn-gateway.service` in `/etc/systemd/system/`:
+To prevent the gateway from sleeping:
 
 ```bash
-[Unit]
-Description=VPN Gateway
-After=network-online.target
-Wants=network-online.target
-
-[Service]
-Type=oneshot
-ExecStart=/bin/bash /opt/vpn-rules.sh
-RemainAfterExit=yes
-
-[Install]
-WantedBy=multi-user.target
+sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
 ```
 
-## Step 3. Create the Rules Script `/opt/vpn-rules.sh`
+## Step 3. Enable Auto-Login (Optional)
 
-File content:
+> [!NOTE]
+> This is a practical approach for GUI-based VPN clients that require an active desktop session to start.
+> If you are using a command-line (CLI) VPN client, you can skip this step and run the VPN as a systemd service instead.
+
+- Open `Settings` > `Users`.
+- Unlock the settings (top right).
+- Toggle `Automatic Login` to `ON`.
+
+This way, the VPN client will start automatically after every reboot.
+
+## Step 4. Prepare a Test Device
+
+You will use the same test device several times while verifying the setup.
+Before you test routing, configure it with:
+- DNS: `8.8.8.8 8.8.4.4`
+- Gateway: `<YOUR_GATEWAY_IP>`
+- Subnet mask: `255.255.255.0` for `/24`
+
+For this example, use `192.168.0.3` as the gateway IP.
+
+> [!CAUTION]
+Do not mix up the subnet mask, or a phone may work at first and then lose internet access after a few hours.
+
+Later, you will reconfigure this same device again in Step 7 for DNS verification, and again in Step 8 for the final client setup.
+
+## Step 5. Create the Rules Script `/opt/vpn-rules.sh`
+
+> [!TIP]
+> If you use `nano`:
+> - Paste text: `Ctrl+Shift+V` (or right-click -> Paste in many terminals).
+> - Remove string: `Ctrl+K`
+> - Delete everything: Keep pressing `Ctrl+K` until the file is empty
+> - Exit with saving: `Ctrl+X`, then press `Y`, then `Enter`.
+> - Exit without saving: `Ctrl+X`, then press `N`.
+
+
+> [!IMPORTANT]
+Set the following variables in the script before running it:
+- `VPN_INTF="tun0"` - VPN interface name.
+- `LAN_INTF="eth0"` - LAN interface name (usually `eth0`).
+- `LAN_IP="192.168.x.x"` - Gateway IP address on your LAN.
+- `LAN_SUBNET="192.168.x.0/24"` - LAN subnet.
+- `VPN_IP="xxx.xxx.xxx.xxx"` - Public IP address of your VPN server (outside your local network).
+- `MSS="<VPN MTU - 80>"` - MSS value derived from VPN MTU with a safety margin.
+- `TTL="64"` - Fixed TTL value.
+
+File content (`sudo nano /opt/vpn-rules.sh`):
 
 ```bash
 #!/bin/bash
@@ -86,7 +121,7 @@ export PATH=/usr/sbin:/usr/bin:/sbin:/bin
 set -e
 
 VPN_INTF="tun0" # Set your vpn interface name
-LAN_INTF="eth0" # Set your lan inerface name (usually eth0)
+LAN_INTF="eth0" # Set your lan interface name (usually eth0)
 LAN_IP="192.168.x.x" # Set your gateway ip
 LAN_SUBNET="192.168.x.0/24" # Set your lan subnet
 VPN_IP="xxx.xxx.xxx.xxx" # Set your VPN server external/public IP (outside your local network)
@@ -217,6 +252,46 @@ iptables -t mangle -A FORWARD -i "$VPN_INTF" -p tcp --tcp-flags SYN,RST SYN -j T
 echo "[OK] Setup completed: VPN gateway rules fully applied"
 ```
 
+### Verification of the script
+Run the script:
+```bash
+sudo chmod +x /opt/vpn-rules.sh && \
+sudo /opt/vpn-rules.sh
+```
+
+Use the test device from Step 3 for this check.
+
+Then make sure the device's traffic goes through the VPN.
+This means the routing part is configured correctly.
+
+#### Troubleshooting
+If the device does not see VPN traffic:
+- discuss the issue with AI, 
+- fix the rules in `/opt/vpn-rules.sh`,
+- reboot the gateway with `sudo reboot`,
+- and run the script again with `sudo bash /opt/vpn-rules.sh`.
+ 
+Repeat this process until the routing works correctly.
+
+## Step 6. Create a systemd Service for Gateway Rules
+
+Create `vpn-gateway.service` in `/etc/systemd/system/`:
+
+```bash
+[Unit]
+Description=VPN Gateway
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash /opt/vpn-rules.sh
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
+```
+
 After saving the file, enable and start the service:
 
 ```bash
@@ -224,7 +299,20 @@ systemctl enable vpn-gateway.service
 systemctl start vpn-gateway.service
 ```
 
-## Step 4. Configure DNS via systemd-resolved
+Check the service status:
+```bash
+systemctl status vpn-gateway.service
+```
+
+If the status is OK (active/success), reboot the gateway to ensure the service starts correctly on startup:
+
+```bash
+sudo reboot
+```
+
+After the reboot, use your test device from Step 3 to verify that the VPN rules are active. Check that traffic is being routed through the VPN before proceeding.
+
+## Step 7. Configure DNS via systemd-resolved
 
 Open `/etc/systemd/resolved.conf`.
 
@@ -259,25 +347,26 @@ Apply the settings:
 sudo systemctl restart systemd-resolved
 ```
 
-## Step 5. Disable System Sleep
-
-To prevent the gateway from sleeping:
-
+You can check your DNS settings with this command:
 ```bash
-sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
+resolvectl status
 ```
 
-## Step 6. Configure Client Devices (TV, etc.)
+### Verification of DNS settings
+Reconfigure the same test device from Step 3 with DNS already set to `<YOUR_GATEWAY_IP>` for this step.
 
-On each device that should access the internet through the VPN gateway, set these Wi-Fi network parameters:
-- DNS: `<YOUR_GATEWAY_IP>`
-- Gateway: `<YOUR_GATEWAY_IP>`
-- Subnet mask: `255.255.255.0` for `/24`
+Then make sure the device can resolve domain names.  
+This means the DNS part is configured correctly.
 
-For this guide's example, use `192.168.0.3`.
+## Step 8. Final Verification
+Once the configuration is complete, verify your setup with these three steps:
 
-> [!CAUTION]
-Do not mix up the subnet mask, or a phone may work at first and then lose internet access after a few hours.
+1. **Routing Check:** On your test device, check your public IP (e.g., via `ifconfig.me`). It should match the VPN server's location, not your ISP.
+2. **DNS Check:** Run a [DNS Leak Test](https://dnsleaktest.com/). It should show that your DNS queries originate from your VPN provider, not your home ISP.
+3. **Kill Switch Check:** Stop your VPN client on the gateway. For example, for OpenVPN, run `sudo systemctl stop openvpn@client`. Your test device should immediately lose internet access. 
+   *Note: If it stays online, re-check your `iptables` rules in `/opt/vpn-rules.sh`.*
+
+
 
 ## 🟢 Congratulations! 🟢
-After that, the device traffic will go through your Linux VPN gateway.
+After that, traffic for the selected devices will go through your Linux VPN gateway.
