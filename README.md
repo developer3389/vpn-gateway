@@ -362,7 +362,7 @@ This means the DNS part is configured correctly.
 Once the configuration is complete, verify your setup with these three steps:
 
 1. **Routing Check:** On your test device, check your public IP (e.g., via `ifconfig.me`). It should match the VPN server's location, not your ISP.
-2. **DNS Check:** Run a [DNS Leak Test](https://dnsleaktest.com/). It should show that your DNS queries originate from your VPN provider, not your home ISP.
+2. **Leak Check:** Run a [Browser Leak Test](https://browserleaks.com/). It should confirm that your DNS, IPv6, and WebRTC traffic are all routed through the VPN tunnel, and that your home ISP's identity is completely masked.
 3. **Kill Switch Check:** Stop your VPN client on the gateway. For example, for OpenVPN, run `sudo systemctl stop openvpn@client`. Your test device should immediately lose internet access. 
    *Note: If it stays online, re-check your `iptables` rules in `/opt/vpn-rules.sh`.*
 
