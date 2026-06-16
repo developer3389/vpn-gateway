@@ -47,8 +47,8 @@ Tasks:
 > Please ensure you have physical access to the device or a backup connection method to revert changes if necessary.
 
 > [!WARNING]
-This guide assumes an IPv4-only setup (no IPv6).
-If your home network uses IPv6, ask AI to adapt these instructions.
+> **VPN server compatibility**:  
+> This guide assumes an IPv4-only VPN server setup. If your VPN provider or server requires IPv6 connectivity, this guide will not work as written. In that case, please ask AI to adapt these instructions for an IPv6-capable gateway.
 
 Example network parameters:
 - router: `192.168.0.1`
