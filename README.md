@@ -48,7 +48,7 @@ Tasks:
 
 > [!WARNING]
 > **VPN server compatibility**:  
-> This guide assumes an IPv4-only VPN server setup. If your VPN provider or server requires IPv6 connectivity, this guide will not work as written. In that case, please ask AI to adapt these instructions for an IPv6-capable gateway.
+> This guide assumes an `IPv4-based` VPN server. If your VPN provider or server requires `IPv6` connectivity, these instructions will not work as written. In that case, please ask AI to adapt this guide for an `IPv6-capable` gateway.
 
 Example network parameters:
 - router: `192.168.0.1`
