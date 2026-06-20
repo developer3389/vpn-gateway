@@ -419,14 +419,13 @@ This part has already been configured in the previous step.
 
 ```bash
 (
-
 # Enable IP forwarding
 sudo sysctl -w net.ipv4.ip_forward=1
 
-# 1. Routing logic: set up a custom routing table for traffic from the client subnet
+# Routing logic: set up a custom routing table for traffic from the client subnet
 sudo ip rule add from 10.255.255.0/24 table 100 priority 100
 
-# 2. Routing logic: define the default gateway for the custom routing table
+# Routing logic: define the default gateway for the custom routing table
 # All traffic matching the rule above will be routed through the secondary tunnel (tun2)
 sudo ip route add default via 10.0.0.1 dev tun2 table 100
 
@@ -441,7 +440,6 @@ sudo iptables -A FORWARD -i tun1 -o tun2 -j ACCEPT
 
 # Allow return traffic from the secondary tunnel back to the primary tunnel
 sudo iptables -A FORWARD -i tun2 -o tun1 -m state --state RELATED,ESTABLISHED -j ACCEPT
-
 )
 ```
 
@@ -456,7 +454,6 @@ sudo iptables -A FORWARD -i tun2 -o tun1 -m state --state RELATED,ESTABLISHED -j
 
 ```bash
 (
-
 # Enable forwarding
 sudo sysctl -w net.ipv4.ip_forward=1
 
@@ -469,7 +466,5 @@ sudo iptables -A FORWARD -i tun1 -o eth0 -j ACCEPT
 # Allow return traffic from the internet back into the tunnel.
 # Only permit established or related connections to maintain security
 sudo iptables -A FORWARD -i eth0 -o tun1 -m state --state RELATED,ESTABLISHED -j ACCEPT
-
 )
 ```
-
