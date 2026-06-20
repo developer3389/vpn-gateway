@@ -419,6 +419,7 @@ This part has already been configured in the previous step.
 
 ```bash
 (
+
 # Enable IP forwarding
 sudo sysctl -w net.ipv4.ip_forward=1
 
@@ -440,6 +441,7 @@ sudo iptables -A FORWARD -i tun1 -o tun2 -j ACCEPT
 
 # Allow return traffic from the secondary tunnel back to the primary tunnel
 sudo iptables -A FORWARD -i tun2 -o tun1 -m state --state RELATED,ESTABLISHED -j ACCEPT
+
 )
 ```
 
@@ -467,6 +469,7 @@ sudo iptables -A FORWARD -i tun1 -o eth0 -j ACCEPT
 # Allow return traffic from the internet back into the tunnel.
 # Only permit established or related connections to maintain security
 sudo iptables -A FORWARD -i eth0 -o tun1 -m state --state RELATED,ESTABLISHED -j ACCEPT
+
 )
 ```
 
