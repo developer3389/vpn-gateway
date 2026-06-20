@@ -405,6 +405,9 @@ This part has already been configured in the previous step.
 ### VPS1 (Intermediate Node)
 ***Gateway** for `tun1` and **client** for `tun2`*
 
+> [!NOTE]
+> These rules assume that the default policy for `INPUT`, `FORWARD`, and `OUTPUT` chains on both `VPS1` and `VPS2` is set to `ACCEPT`.
+
 > [!CAUTION]  
 > Do not forget to account for the rules already set by your OpenVPN/WireGuard installation scripts.  
 > They may also require adjustments.
