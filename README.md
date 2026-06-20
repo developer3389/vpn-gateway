@@ -391,7 +391,7 @@ After that, traffic for the selected devices will go through your Linux VPN gate
 > [!NOTE]
 > This section is not required for a standard VPN Gateway setup. It is intended for regions with restrictive network environments where cascading multiple VPS nodes is necessary for internet access.
 
-In reality, it is quite difficult to provide a "one-size-fits-all" instruction for this domain. The configuration for an OpenVPN-over-OpenVPN cascade differs significantly from a WireGuard-over-OpenVPN setup.
+In reality, it is quite difficult to provide a "one-size-fits-all" instruction for this domain. The configuration for an OpenVPN-to-OpenVPN cascade differs significantly from a WireGuard-to-OpenVPN setup.
 
 > [!CAUTION]  
 > Do not forget to account for the rules already set by your OpenVPN/WireGuard installation scripts.  
