@@ -464,7 +464,8 @@ sudo iptables -t nat -A POSTROUTING -s 10.0.0.0/24 -o eth0 -j MASQUERADE
 # Allow traffic forwarding from the tunnel to the external interface
 sudo iptables -A FORWARD -i tun1 -o eth0 -j ACCEPT
 
-# Allow return traffic from the internet back into the tunnel. Only permit established or related connections to maintain security
+# Allow return traffic from the internet back into the tunnel.
+# Only permit established or related connections to maintain security
 sudo iptables -A FORWARD -i eth0 -o tun1 -m state --state RELATED,ESTABLISHED -j ACCEPT
 )
 ```
