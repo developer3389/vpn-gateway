@@ -17,6 +17,7 @@ This guide is provided for educational purposes only.
 - [Step 6. Create a systemd Service](#step-6-create-a-systemd-service-for-gateway-rules)
 - [Step 7. Configure DNS via systemd-resolved](#step-7-configure-dns-via-systemd-resolved)
 - [Step 8. Final Verification](#step-8-final-verification)
+- [Appendix: How to set up a VPN cascade](#appendix-how-to-set-up-a-vpn-cascade)
 
 ---
 
@@ -384,3 +385,88 @@ Once the configuration is complete, verify your setup with these three steps:
 
 ## 🟢 Congratulations! 🟢
 After that, traffic for the selected devices will go through your Linux VPN gateway.
+
+## Appendix: How to set up a VPN cascade
+
+> [!NOTE]
+> This section is not required for a standard VPN Gateway setup. It is intended for regions with restrictive network environments where cascading multiple VPS nodes is necessary for internet access.
+
+In reality, it is quite difficult to provide a "one-size-fits-all" instruction for this domain. The configuration for an OpenVPN-over-OpenVPN cascade differs significantly from a WireGuard-over-OpenVPN setup.
+
+> [!CAUTION]  
+> Do not forget to account for the rules already set by your OpenVPN/WireGuard installation scripts.  
+> They may also require adjustments.
+
+However, I can provide a general framework:
+
+Cascading scenario: `VPN GATEWAY -> VPS1 -> VPS2`
+
+> [!IMPORTANT]  
+> **Prerequisites**: This rules assume that the basic VPN tunnels (`VPN GATEWAY` to `VPS1` and `VPS1` to `VPS2`) are already established and verified as functional point-to-point connections.
+
+### VPN GATEWAY (Entry Node)
+This part has already been configured in the previous step.
+
+### VPS1 (Intermediate Node)
+***Gateway** for `tun1` and **client** for `tun2`*
+
+* main interface - `eth0`
+- first vpn interface - `tun1`
+    - subnet `10.255.255.0/24`
+    - gateway `10.255.255.1`
+* second vpn interface - `tun2`
+    - subnet `10.0.0.0/24`
+    - gateway `10.0.0.1`
+
+```bash
+(
+# Enable IP forwarding
+sudo sysctl -w net.ipv4.ip_forward=1
+
+# 1. Routing logic: set up a custom routing table for traffic from the client subnet
+sudo ip rule add from 10.255.255.0/24 table 100 priority 100
+
+# 2. Routing logic: define the default gateway for the custom routing table
+# All traffic matching the rule above will be routed through the secondary tunnel (tun2)
+sudo ip route add default via 10.0.0.1 dev tun2 table 100
+
+# Masquerade outbound traffic from the client subnet towards the secondary tunnel
+sudo iptables -t nat -A POSTROUTING -s 10.255.255.0/24 -o tun2 -j MASQUERADE
+
+# Masquerade traffic exiting through the primary tunnel
+sudo iptables -t nat -A POSTROUTING -o tun1 -j MASQUERADE
+
+# Allow traffic forwarding from the primary tunnel to the secondary tunnel
+sudo iptables -A FORWARD -i tun1 -o tun2 -j ACCEPT
+
+# Allow return traffic from the secondary tunnel back to the primary tunnel
+sudo iptables -A FORWARD -i tun2 -o tun1 -m state --state RELATED,ESTABLISHED -j ACCEPT
+)
+```
+
+### VPS2 (Exit Node)
+***Gateway** for `tun2`*
+
+* main interface - `eth0`
+- vpn interface - `tun1`
+    - subnet `10.0.0.0/24`
+    - gateway `10.0.0.1`
+
+
+```bash
+(
+
+# Enable forwarding
+sudo sysctl -w net.ipv4.ip_forward=1
+
+# Enable NAT for outbound internet traffic
+sudo iptables -t nat -A POSTROUTING -s 10.0.0.0/24 -o eth0 -j MASQUERADE
+
+# Allow traffic forwarding from the tunnel to the external interface
+sudo iptables -A FORWARD -i tun1 -o eth0 -j ACCEPT
+
+# Allow return traffic from the internet back into the tunnel. Only permit established or related connections to maintain security
+sudo iptables -A FORWARD -i eth0 -o tun1 -m state --state RELATED,ESTABLISHED -j ACCEPT
+)
+```
+
