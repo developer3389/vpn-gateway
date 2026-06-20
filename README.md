@@ -391,13 +391,8 @@ After that, traffic for the selected devices will go through your Linux VPN gate
 > [!NOTE]
 > This section is not required for a standard VPN Gateway setup. It is intended for regions with restrictive network environments where cascading multiple VPS nodes is necessary for internet access.
 
-In reality, it is quite difficult to provide a "one-size-fits-all" instruction for this domain. The configuration for an OpenVPN-to-OpenVPN cascade differs significantly from a WireGuard-to-OpenVPN setup.
-
-> [!CAUTION]  
-> Do not forget to account for the rules already set by your OpenVPN/WireGuard installation scripts.  
-> They may also require adjustments.
-
-However, I can provide a general framework:
+In reality, it is quite difficult to provide a "one-size-fits-all" instruction for this domain. The configuration for an OpenVPN-to-OpenVPN cascade differs significantly from a WireGuard-to-OpenVPN setup.  
+However, we can provide a general framework:
 
 Cascading scenario: `VPN GATEWAY -> VPS1 -> VPS2`
 
@@ -409,6 +404,10 @@ This part has already been configured in the previous step.
 
 ### VPS1 (Intermediate Node)
 ***Gateway** for `tun1` and **client** for `tun2`*
+
+> [!CAUTION]  
+> Do not forget to account for the rules already set by your OpenVPN/WireGuard installation scripts.  
+> They may also require adjustments.
 
 * main interface - `eth0`
 - first vpn interface - `tun1`
